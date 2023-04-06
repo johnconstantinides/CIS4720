@@ -149,6 +149,9 @@ class Gui:
         max_filtering_button.pack(side=tk.LEFT)
         med_filtering_button.pack(side=tk.LEFT)
 
+        edge_detection_button = tk.Button(self.root,text="Edge detection",command=self.edgeDetection)
+        edge_detection_button.pack()
+
 
 
         #image display
@@ -247,6 +250,12 @@ class Gui:
 
     def medFiltering(self):
         newImg = maxFiltering(self.img,int(self.filtersize_input.get(1.0,"end-1c")))
+        if newImg:
+            self.img = newImg
+            self.displayImage()
+    
+    def edgeDetection(self):
+        newImg = laplacianEdgeDetection(self.img)
         if newImg:
             self.img = newImg
             self.displayImage()
