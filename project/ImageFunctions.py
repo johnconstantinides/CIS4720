@@ -152,7 +152,7 @@ def createHistogram(img):
     plt.ylabel("Frequency")
     plt.show()
 
-def histogramEqualization(img):
+def normalizedHistogram(img):
     if img.mode != 'L':
         return
     #counts the ammount of pixels for each intensity level
@@ -162,11 +162,24 @@ def histogramEqualization(img):
         for j in range(height):
             normalized_histogram[img.getpixel((i,j))] += 1/(width*height)
 
+    return normalized_histogram
 
-    #get the cumulative normalized histogram
+def cumulativeNormalizedHistogram(normalized_histogram):
     cumulative_normalized_histogram = numpy.zeros((256), dtype=float)
     for i in range(0,len(normalized_histogram)):
         cumulative_normalized_histogram[i] = sum(normalized_histogram[0:i + 1]) 
+
+    return cumulative_normalized_histogram
+
+def histogramEqualization(img):
+    if img.mode != 'L':
+        return
+    #counts the ammount of pixels for each intensity level
+    width, height = img.size
+    normalized_histogram = normalizedHistogram(img)
+
+    #get the cumulative normalized histogram
+    cumulative_normalized_histogram = cumulativeNormalizedHistogram(normalized_histogram)
 
 
     imgNew = Image.new(mode="L",size=(width,height))
