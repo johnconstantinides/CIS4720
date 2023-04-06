@@ -249,13 +249,13 @@ class Gui:
             self.displayImage()
 
     def medFiltering(self):
-        newImg = maxFiltering(self.img,int(self.filtersize_input.get(1.0,"end-1c")))
+        newImg = medFiltering(self.img,int(self.filtersize_input.get(1.0,"end-1c")))
         if newImg:
             self.img = newImg
             self.displayImage()
     
     def edgeDetection(self):
-        newImg = laplacianEdgeDetection(self.img)
+        newImg = sobelDetection(self.img)
         if newImg:
             self.img = newImg
             self.displayImage()

@@ -69,25 +69,14 @@ def cropImage(img,firstPoint, secondPoint):
 
 
 def rotateImage(img,angle):
-    orginal_width, orginal_height = img.size
-
-    
-    # find the center of the image
-    center = (orginal_width//2,orginal_height//2)
-    angle_rad = math.radians(angle)
-
-    #calculate new width, height after rotation
-    p1 = (center[0] + int(math.cos(angle_rad)*(0 - center[0]) - math.sin(angle_rad)*(0 - center[1])),center[1] + int(math.sin(angle_rad)*(0 - center[0]) + math.cos(angle_rad)*(0 - center[1])))
-    p2 = (center[0] + int(math.cos(angle_rad)*(orginal_width - 1 - center[0]) - math.sin(angle_rad)*(0 - center[1])),center[1] + int(math.sin(angle_rad)*(orginal_width - 1 - center[0]) + math.cos(angle_rad)*(0 - center[1])))
-    p3 = (center[0] + int(math.cos(angle_rad)*(0 - center[0]) - math.sin(angle_rad)*(orginal_height - 1 - center[1])),center[1] + int(math.sin(angle_rad)*(0 - center[0]) + math.cos(angle_rad)*(orginal_height - 1 - center[1])))
-    p4 = (center[0] + int(math.cos(angle_rad)*(orginal_width - 1 - center[0]) - math.sin(angle_rad)*(orginal_height - 1 - center[1])),center[1] + int(math.sin(angle_rad)*(orginal_width - 1 - center[0]) + math.cos(angle_rad)*(orginal_height - 1 - center[1])))
-    width = max(p1[0],p2[0],p3[0],p4[0]) - min(p1[0],p2[0],p3[0],p4[0])
-    height = max(p1[1],p2[1],p3[1],p4[1]) - min(p1[1],p2[1],p3[1],p4[1])
-    center = (width//2,height//2)
-    
+    width, height = img.size
 
     imgNew = Image.new(mode=img.mode,size=(width,height))
     pixelMap = imgNew.load()
+    
+    # find the center of the image
+    center = (width//2,height//2)
+    angle_rad = math.radians(angle)
 
     for i in range(width):
         for j in range(height):
@@ -95,7 +84,7 @@ def rotateImage(img,angle):
             rotation_x = center[0] + int(math.cos(angle_rad)*(i - center[0]) - math.sin(angle_rad)*(j - center[1])) 
             rotation_y = center[1] + int(math.sin(angle_rad)*(i - center[0]) + math.cos(angle_rad)*(j - center[1]))
             
-            if rotation_x >= 0 and rotation_x < width and rotation_y >= 0 and rotation_y < height and rotation_x < orginal_width and rotation_y < orginal_height:
+            if rotation_x >= 0 and rotation_x < width and rotation_y >= 0 and rotation_y < height:
                 pixelMap[i,j] = img.getpixel((rotation_x,rotation_y))
             
 
@@ -187,6 +176,8 @@ def histogramEqualization(img):
     for i in range(width):
         for j in range(height):
             pixelMap[i,j] = int(cumulative_normalized_histogram[img.getpixel((i,j))]*255)
+    
+    return imgNew
 
 def convolution(img,kernel):
     width, height = img.size
@@ -295,18 +286,33 @@ def medFiltering(img,filterSize):
         for y in range(height):
 
             pixelMap[x,y] = img.getpixel((x,y))
-            values = []
+
+            if img.mode == 'L':
+                values = []
+            elif img.mode == 'RGB':
+                values = [[],[],[]]
+            
+            #loop through the neighbourhood of pixel (x,y)
             for i in range(-(filterSize - 1)//2,(filterSize - 1)//2 + 1):
                 for j in range(-(filterSize - 1)//2,(filterSize - 1)//2 + 1):
-                    #cmake sure pixel is not out of the ranges
+                    #make sure pixel is not out of the ranges
                     if not ((x - i) < 0 or (x - i) >= width or (y - j) < 0 or (y - j) >= height):
-                        values.append(img.getpixel((x - i, y - j)))
-            pixelMap[x,y] = int(median(values))
+                        if img.mode == 'L':
+                            values.append(img.getpixel((x - i, y - j)))
+                        else:
+                            values[0].append(img.getpixel((x - i, y - j))[0])
+                            values[1].append(img.getpixel((x - i, y - j))[1])
+                            values[2].append(img.getpixel((x - i, y - j))[2])
+            if img.mode == 'L':
+                pixelMap[x,y] = int(statistics.median(values))
+            elif img.mode == 'RGB':
+                pixelMap[x,y] = (int(statistics.median(values[0])),int(statistics.median(values[1])),int(statistics.median(values[2])))
 
     return imgNew
     
 def sobelDetection(img):
     width, height = img.size
+    img = convertToGrayscale(img)
     imgNew = Image.new(mode=img.mode,size=(width,height))
     pixelMap = imgNew.load()
 
@@ -356,3 +362,20 @@ def laplacianEdgeDetection(img):
                     pixelMap[i,j] = 0
 
     return imgNew
+
+# img = Image.open("project\car.jpg")
+
+# pixelMap = img.load()
+
+# width, height = img.size
+# import random
+# for i in range(width):
+#     for j in range(height):
+#         rand = random.randint(1,100)
+#         if rand<= 5:
+#             pixelMap[i,j] = (255,255,255)
+#         if rand >= 95:
+#             pixelMap[i,j] = (0,0,0)
+
+# img.save("project\minmaxfilter.jpg")
+        
