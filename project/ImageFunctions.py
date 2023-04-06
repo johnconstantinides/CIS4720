@@ -67,6 +67,23 @@ def cropImage(img,firstPoint, secondPoint):
 
     return imgNew
 
+def verticalShear(img,shear):
+    width, height = img.size
+
+    imgNew = Image.new(mode=img.mode,size=(width,height))
+    pixelMap = imgNew.load()
+ 
+    for i in range(width):
+        for j in range(height):
+            new_i = i + int(j * shear)
+            new_j = j
+
+            # Assign the pixel value to the sheared image
+            if new_i >= 0 and new_i < width and new_j > 0 and new_i <= height:
+                pixelMap[new_i, new_j] = img.getpixel((i,j))
+
+    return imgNew
+
 
 def rotateImage(img,angle):
     width, height = img.size
@@ -152,11 +169,13 @@ def createHistogram(img):
     plt.ylabel("Frequency")
     plt.show()
 
+#creates a normalized histogram of image and returns it
 def normalizedHistogram(img):
     if img.mode != 'L':
         return
     #counts the ammount of pixels for each intensity level
     width, height = img.size
+
     normalized_histogram = numpy.zeros((256), dtype=float)
     for i in range(width):
         for j in range(height):
@@ -164,6 +183,7 @@ def normalizedHistogram(img):
 
     return normalized_histogram
 
+#creates a cumulative normalized histogram from a normalized histogram and returns it
 def cumulativeNormalizedHistogram(normalized_histogram):
     cumulative_normalized_histogram = numpy.zeros((256), dtype=float)
     for i in range(0,len(normalized_histogram)):
@@ -342,47 +362,12 @@ def sobelDetection(img):
         for j in range(height):
             pixelMap[i,j] =  int(math.sqrt(x_image.getpixel((i,j))**2 + y_image.getpixel((i,j))**2))
     
-    #maybe change the value 56
+    #thresholding.
     for i in range(width):
         for j in range(height):
-            if imgNew.getpixel((i,j)) > 56:
+            if imgNew.getpixel((i,j)) > 30:
                 pixelMap[i,j] = 255
             else:
                 pixelMap[i,j] = 0
 
     return imgNew
-
-def laplacianEdgeDetection(img):
-    width, height = img.size
-    img = convertToGrayscale(img)
-    imgNew = Image.new(mode='L',size=(width,height))
-    pixelMap = imgNew.load()
-    
-    pp = convolution(img,[[0,1,0],[1,-4,1],[0,1,0]])
-
-
-    for i in range(width):
-        for j in range(height):
-            if pp.getpixel((i,j)) > 30:
-                pixelMap[i,j] = 255
-            else:
-                pixelMap[i,j] = 0
-
-    return imgNew
-
-# img = Image.open("project\car.jpg")
-
-# pixelMap = img.load()
-
-# width, height = img.size
-# import random
-# for i in range(width):
-#     for j in range(height):
-#         rand = random.randint(1,100)
-#         if rand<= 5:
-#             pixelMap[i,j] = (255,255,255)
-#         if rand >= 95:
-#             pixelMap[i,j] = (0,0,0)
-
-# img.save("project\minmaxfilter.jpg")
-        

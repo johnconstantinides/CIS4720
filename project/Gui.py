@@ -14,9 +14,14 @@ class Gui:
         self.root.title("Image processor")
 
 
-        #upload button
-        button = tk.Button(text="Upload File",command=self.openFile)
-        button.pack()
+        #file options
+        file_options_frame = tk.Frame(self.root)
+        file_options_frame.pack()
+        upload_button = tk.Button(file_options_frame,text="Upload File",command=self.openFile)
+        upload_button.pack(side=tk.LEFT)
+        save_button = tk.Button(file_options_frame,text="Save File",command=self.saveFile)
+        save_button.pack(side=tk.LEFT)
+
 
 
         #scale
@@ -36,13 +41,13 @@ class Gui:
         self.scale_button = tk.Button(text="Scale Image",command=self.scaleImage)
         self.scale_button.pack()
 
-        #horizontal 
+        #horizontal flip
         flip_frame = tk.Frame(self.root)
         flip_frame.pack()
         self.horizontalFlipButton = tk.Button(flip_frame,text="Flip Horizontally",command=self.horizontalFlip)
         self.horizontalFlipButton.pack(side=tk.LEFT)
 
-        #vertical
+        #vertical flip
         self.verticalFlipButton = tk.Button(flip_frame,text="Flip vertically", command=self.verticalFlip)
         self.verticalFlipButton.pack(side=tk.LEFT)
 
@@ -84,6 +89,18 @@ class Gui:
         y2label.pack(side=tk.RIGHT)
         self.crop_button = tk.Button(text="Crop", command=self.cropImage)
         self.crop_button.pack()
+
+        #shear
+
+        shear_frame = tk.Frame(self.root)
+        shear_frame.pack()
+        shear_label = tk.Label(shear_frame,text="Shear")
+        shear_label.pack(side=tk.LEFT)
+        self.shear_input = tk.Text(shear_frame,width=5,height=1)
+        self.shear_input.pack(side=tk.LEFT)
+        vertical_shear_button = tk.Button(shear_frame,text="Apply shear",command=self.verticalShear)
+        vertical_shear_button.pack(side=tk.LEFT)
+
 
         #convert to grayscale
         grayscale_button = tk.Button(self.root,text="Convert to grayscale", command=self.convertToGrayscale)
@@ -174,6 +191,9 @@ class Gui:
         self.image_display.configure(image=img)
         self.image_display.image = img
     
+    def saveFile(self):
+        self.img.save(self.imagepath)
+    
     def scaleImage(self):
         newImg = resizeImage(self.img,float(self.height_change.get(1.0, "end-1c")),float(self.width_change.get(1.0, "end-1c")))
         if newImg:
@@ -200,6 +220,12 @@ class Gui:
     
     def cropImage(self):
         newImg = cropImage(self.img,(int(self.x1.get(1.0, "end-1c")),int(self.y1.get(1.0, "end-1c"))),(int(self.x2.get(1.0, "end-1c")),int(self.y2.get(1.0, "end-1c"))))
+        if newImg:
+            self.img = newImg
+            self.displayImage()
+    
+    def verticalShear(self):
+        newImg = verticalShear(self.img,float(self.shear_input.get(1.0,"end-1c")))
         if newImg:
             self.img = newImg
             self.displayImage()
