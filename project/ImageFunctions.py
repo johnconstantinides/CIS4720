@@ -92,7 +92,7 @@ def rotateImage(img,angle):
 
 def convertToGrayscale(img):
     if img.mode == "L":
-        return
+        return img
     
     width, height = img.size
     imgNew = Image.new(mode="L",size=(width,height))
@@ -170,6 +170,8 @@ def cumulativeNormalizedHistogram(normalized_histogram):
         cumulative_normalized_histogram[i] = sum(normalized_histogram[0:i + 1]) 
 
     return cumulative_normalized_histogram
+
+
 
 def histogramEqualization(img):
     if img.mode != 'L':
@@ -325,54 +327,46 @@ def medFiltering(img,filterSize):
     
 def sobelDetection(img):
     width, height = img.size
-    img = convertToGrayscale(img)
-    imgNew = Image.new(mode=img.mode,size=(width,height))
+    if img.mode != 'L':
+        img = convertToGrayscale(img)
+    imgNew = Image.new(mode='L',size=(width,height))
     pixelMap = imgNew.load()
 
     #vertical lines
     x_image = convolution(img,[[1,0,-1],[2,0,-2],[1,0,-1]])
-    y_image = convolution(img,[[-1,-2,-1],[0,0,0],[1,2,1]])
-    average = 0
+    #horizontal
+    y_image = convolution(img,[[1,2,1],[0,0,0],[-1,-2,-1]])
+
+    #get the average value
     for i in range(width):
         for j in range(height):
-            if img.mode == 'L':
-                average += int(math.sqrt(x_image.getpixel((i,j))**2 + y_image.getpixel((i,j))**2))
-
-
-    average = int(average/(width*height))
-
+            pixelMap[i,j] =  int(math.sqrt(x_image.getpixel((i,j))**2 + y_image.getpixel((i,j))**2))
+    
+    #maybe change the value 56
     for i in range(width):
         for j in range(height):
-            if img.mode == 'L':
-                magnitude = int(math.sqrt(x_image.getpixel((i,j))**2 + y_image.getpixel((i,j))**2))
-                if magnitude > average:
-                    pixelMap[i,j] = 255
-                else:
-                    pixelMap[i,j] = 0
+            if imgNew.getpixel((i,j)) > 56:
+                pixelMap[i,j] = 255
+            else:
+                pixelMap[i,j] = 0
 
     return imgNew
 
 def laplacianEdgeDetection(img):
     width, height = img.size
-    imgNew = Image.new(mode=img.mode,size=(width,height))
+    img = convertToGrayscale(img)
+    imgNew = Image.new(mode='L',size=(width,height))
     pixelMap = imgNew.load()
     
     pp = convolution(img,[[0,1,0],[1,-4,1],[0,1,0]])
-    average = 0
-    for i in range(width):
-        for j in range(height):
-            if img.mode == 'L':
-                average += pp.getpixel((i,j))
 
-    average = int(average/(width*height))
 
     for i in range(width):
         for j in range(height):
-            if img.mode == 'L':
-                if pp.getpixel((i,j)) > average:
-                    pixelMap[i,j] = 255
-                else:
-                    pixelMap[i,j] = 0
+            if pp.getpixel((i,j)) > 30:
+                pixelMap[i,j] = 255
+            else:
+                pixelMap[i,j] = 0
 
     return imgNew
 
