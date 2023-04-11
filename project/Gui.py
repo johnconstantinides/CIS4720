@@ -21,6 +21,8 @@ class Gui:
         upload_button.pack(side=tk.LEFT)
         save_button = tk.Button(file_options_frame,text="Save File",command=self.saveFile)
         save_button.pack(side=tk.LEFT)
+        view_image_button = tk.Button(file_options_frame,text="View Image",command=lambda:self.img.show())
+        view_image_button.pack(side=tk.LEFT)
 
 
 
@@ -98,7 +100,7 @@ class Gui:
         shear_label.pack(side=tk.LEFT)
         self.shear_input = tk.Text(shear_frame,width=5,height=1)
         self.shear_input.pack(side=tk.LEFT)
-        vertical_shear_button = tk.Button(shear_frame,text="Apply shear",command=self.verticalShear)
+        vertical_shear_button = tk.Button(shear_frame,text="Apply horizontal shear",command=self.verticalShear)
         vertical_shear_button.pack(side=tk.LEFT)
 
 
@@ -178,8 +180,8 @@ class Gui:
         #main loop
         self.root.mainloop()
 
-    #methods that use the imagefunctions I made and gets them to work with the gui
-    #opens file and displaus it
+    #methods that use the functions from the library I created imageFunctions. I made them to work with the gui
+    #opens file and displays it
     def openFile(self):
         self.imagepath =  filedialog.askopenfilename()
         self.img = Image.open(self.imagepath)
@@ -225,7 +227,7 @@ class Gui:
             self.displayImage()
     
     def verticalShear(self):
-        newImg = verticalShear(self.img,float(self.shear_input.get(1.0,"end-1c")))
+        newImg = horizontalShear(self.img,float(self.shear_input.get(1.0,"end-1c")))
         if newImg:
             self.img = newImg
             self.displayImage()
